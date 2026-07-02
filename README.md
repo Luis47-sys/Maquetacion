@@ -67,4 +67,4 @@ Se evaluará:
 
 Proyecto desarrollado como parte del curso de Emprendimiento.
 
-Universidad Andina del Cusco
+Universidad Nacional de San Antonio Abad del Cusco
