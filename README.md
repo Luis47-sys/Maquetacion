@@ -63,8 +63,11 @@ Se evaluará:
 
 ---
 
-# Autores
-
+# Integrantes:
+---
 Proyecto desarrollado como parte del curso de Emprendimiento.
-
+- Araccely Llanacaya Tapia
+- Ingrid Rosario Noa Aller
+- Luis Adrian Surco Cutipa
+---
 Universidad Nacional de San Antonio Abad del Cusco
