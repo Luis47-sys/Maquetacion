@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CargaYa</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #1A3C2E;
+    --green-mid: #0D7A4E;
+    --green-action: #00C853;
+    --green-light: #E8F5E9;
+    --amber: #FFB300;
+    --red: #F44336;
+    --blue: #1565C0;
+    --blue-light: #E3F2FD;
+    --white: #FFFFFF;
+    --gray-50: #F8FAFB;
+    --gray-100: #EEF1F3;
+    --gray-200: #D8DDE3;
+    --gray-400: #9AA5B1;
+    --gray-600: #546E7A;
+    --gray-800: #263238;
+    --shadow: 0 2px 12px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.18);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--green-dark);
+    color: white;
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--green-action);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 0.7rem; color: rgba(255,255,255,0.55); font-weight: 400; margin-left: 2px; }
+
+  .step-indicator {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.8);
+  }
+  .step-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: var(--green-action); }
+
+  /* ── FLOW TRACKER ── */
+  .flow-bar {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 2rem;
+    overflow-x: auto;
+    display: flex;
+    align-items: stretch;
+    height: 52px;
+    gap: 0;
+  }
+  .flow-step {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 14px;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--gray-400);
+    border-bottom: 2px solid transparent;
+    position: relative;
+    cursor: default;
+    transition: all 0.3s;
+  }
+  .flow-step .fs-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-400);
+    font-size: 0.65rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  .flow-step.done { color: var(--green-mid); }
+  .flow-step.done .fs-num { background: var(--green-action); color: white; }
+  .flow-step.active { color: var(--green-dark); border-bottom-color: var(--green-action); }
+  .flow-step.active .fs-num { background: var(--green-dark); color: white; }
+  .flow-step:not(:last-child)::after {
+    content: '›';
+    position: absolute; right: -2px;
+    color: var(--gray-200);
+    font-size: 1rem;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .stage {
+    display: flex;
+    gap: 0;
+    min-height: calc(100vh - 112px);
+    overflow: hidden;
+  }
+
+  /* ── PHONES SECTION ── */
+  .phones-area {
+    flex: 1;
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    position: relative;
+  }
+
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .phone-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .phone-label .role-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.67rem;
+    font-weight: 700;
+  }
+  .role-badge.empresa { background: #E3F2FD; color: #1565C0; }
+  .role-badge.transportista { background: #E8F5E9; color: #2E7D32; }
+
+  /* Phone frame */
+  .phone {
+    width: 270px;
+    height: 540px;
+    background: var(--gray-800);
+    border-radius: 36px;
+    padding: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 70px; height: 22px;
+    background: var(--gray-800);
+    border-radius: 0 0 14px 14px;
+    z-index: 10;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--white);
+    border-radius: 28px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Screen header */
+  .screen-header {
+    background: var(--green-dark);
+    color: white;
+    padding: 28px 14px 10px;
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .screen-header.blue-header { background: var(--blue); }
+  .screen-title { font-size: 0.82rem; font-weight: 700; flex: 1; }
+  .screen-back { font-size: 0.75rem; opacity: 0.7; cursor: pointer; }
+
+  /* Status pill */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.62rem; font-weight: 600;
+  }
+  .status-pill.available { background: #E8F5E9; color: #2E7D32; }
+  .status-pill.pending { background: #FFF3E0; color: #E65100; }
+  .status-pill.transit { background: #E3F2FD; color: #1565C0; }
+  .status-pill.done { background: #F3E5F5; color: #6A1B9A; }
+
+  /* Screen body */
+  .screen-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 6px;
+  }
+  .card-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.68rem;
+    color: var(--gray-600);
+    margin-bottom: 3px;
+  }
+  .card-row strong { color: var(--gray-800); font-weight: 600; }
+  .price { font-size: 0.9rem; font-weight: 800; color: var(--green-mid); }
+
+  /* Route display */
+  .route-display {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; font-weight: 700; color: var(--gray-800);
+  }
+  .route-arrow { color: var(--green-action); font-size: 1rem; }
+
+  /* Rating stars */
+  .stars { color: var(--amber); font-size: 0.7rem; }
+
+  /* Map placeholder */
+  .map-placeholder {
+    background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 40%, #81C784 70%, #66BB6A 100%);
+    border-radius: 8px;
+    height: 90px;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .map-road {
+    position: absolute;
+    top: 30%; left: 10%; right: 10%;
+    height: 3px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 2px;
+  }
+  .map-truck {
+    position: absolute;
+    font-size: 1.4rem;
+    top: 20%;
+    transition: left 1s ease-in-out;
+  }
+  .map-pin { font-size: 1.2rem; }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid var(--gray-100);
+    background: white;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 6px 2px;
+    gap: 2px;
+    font-size: 0.55rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .nav-item.active { color: var(--green-action); }
+  .nav-icon { font-size: 1rem; }
+  .nav-pub {
+    width: 32px; height: 32px;
+    background: var(--green-action);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem;
+    margin-bottom: 2px;
+    margin-top: -10px;
+    box-shadow: 0 2px 8px rgba(0,200,83,0.4);
+  }
+
+  /* Btn styles */
+  .btn {
+    width: 100%;
+    padding: 9px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--green-action); color: white; }
+  .btn-primary:hover { background: #00A844; transform: translateY(-1px); }
+  .btn-secondary { background: var(--gray-100); color: var(--gray-800); }
+  .btn-danger { background: #FFEBEE; color: var(--red); }
+
+  /* Offer card */
+  .offer-card {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .offer-card:hover { border-color: var(--green-action); }
+  .offer-card.selected { border-color: var(--green-action); background: var(--green-light); }
+  .offer-company { font-size: 0.7rem; font-weight: 700; color: var(--gray-800); }
+  .offer-detail { font-size: 0.63rem; color: var(--gray-600); margin-top: 2px; }
+  .offer-price { font-size: 0.82rem; font-weight: 800; color: var(--green-mid); }
+
+  /* Notification toast */
+  .toast {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--green-dark);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.4s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* SIDEBAR CONTROLS */
+  .sidebar {
+    width: 260px;
+    background: white;
+    border-left: 1px solid var(--gray-200);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section { }
+  .sidebar-heading {
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+  }
+
+  .flow-btn {
+    width: 100%;
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-family: inherit;
+    margin-bottom: 6px;
+  }
+  .flow-btn:hover { border-color: var(--green-action); background: var(--green-light); }
+  .flow-btn.current { border-color: var(--green-action); background: var(--green-light); }
+  .flow-btn .fb-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 0.68rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .flow-btn.current .fb-num { background: var(--green-action); color: white; }
+  .flow-btn .fb-text { font-size: 0.72rem; color: var(--gray-800); font-weight: 500; }
+  .flow-btn .fb-sub { font-size: 0.62rem; color: var(--gray-400); margin-top: 1px; }
+
+  .big-next-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--green-action);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(0,200,83,0.3);
+  }
+  .big-next-btn:hover { background: #00A844; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,200,83,0.4); }
+  .big-next-btn:disabled { background: var(--gray-200); color: var(--gray-400); cursor: default; box-shadow: none; transform: none; }
+
+  .info-box {
+    background: var(--blue-light);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 0.7rem;
+    color: var(--blue);
+    line-height: 1.5;
+  }
+  .info-box strong { font-weight: 700; display: block; margin-bottom: 3px; }
+
+  /* ── SCREEN VIEWS ── */
+  .screen-view { display: none; flex-direction: column; height: 100%; }
+  .screen-view.active { display: flex; }
+
+  /* Input fields on phone */
+  .field-group { margin-bottom: 8px; }
+  .field-label { font-size: 0.62rem; color: var(--gray-600); font-weight: 600; margin-bottom: 3px; }
+  .field-value {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    color: var(--gray-800);
+    font-weight: 500;
+  }
+
+  /* Success screen */
+  .success-center {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 10px; padding: 20px; flex: 1;
+    text-align: center;
+  }
+  .success-icon { font-size: 3rem; }
+  .success-title { font-size: 0.85rem; font-weight: 800; color: var(--green-dark); }
+  .success-sub { font-size: 0.68rem; color: var(--gray-600); line-height: 1.5; }
+
+  /* Animation pulse */
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .pulse { animation: pulse 1.5s infinite; }
+
+  @keyframes slideIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+  .slide-in { animation: slideIn 0.35s ease forwards; }
+
+  .divider {
+    border: none; border-top: 1px solid var(--gray-100); margin: 4px 0;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: var(--gray-100);
+    color: var(--gray-600);
+  }
+  .tag.green { background: var(--green-light); color: var(--green-mid); }
+
+  /* Timeline tracking */
+  .tracking-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 0.65rem; color: var(--gray-600);
+    margin-bottom: 6px;
+  }
+  .tracking-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gray-200); margin-top: 3px; flex-shrink: 0;
+  }
+  .tracking-dot.done-dot { background: var(--green-action); }
+  .tracking-dot.current-dot { background: var(--amber); }
+
+  /* scroll inside screen */
+  .scrollable { overflow-y: auto; }
+  .scrollable::-webkit-scrollbar { width: 3px; }
+  .scrollable::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  /* connecting arrow between phones */
+  .phones-connector {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 10px; padding-top: 80px;
+    color: var(--gray-400);
+    flex-shrink: 0;
+  }
+  .connector-line {
+    width: 2px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--gray-200), transparent);
+  }
+  .connector-arrow {
+    font-size: 1.3rem;
+    color: var(--green-action);
+    animation: pulse 1.5s infinite;
+  }
+  .connector-label {
+    font-size: 0.62rem; font-weight: 600;
+    color: var(--gray-400); text-align: center;
+    line-height: 1.4;
+  }
+
+  /* photo evidence */
+  .photo-placeholder {
+    background: var(--gray-100);
+    border: 2px dashed var(--gray-200);
+    border-radius: 8px;
+    height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gray-400); font-size: 0.65rem; gap: 4px;
+  }
+
+  /* Rating */
+  .rating-stars button {
+    background: none; border: none; font-size: 1.2rem; cursor: pointer;
+    color: var(--gray-200); transition: color 0.15s;
+    padding: 0 2px;
+  }
+  .rating-stars button.lit { color: var(--amber); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <div>
+      <div class="logo-text">CargaYa</div>
+      </div>
+  </div>
+  <div class="step-indicator" id="stepIndicator">
+    <div class="step-dot active" id="sd1"></div>
+    <div class="step-dot" id="sd2"></div>
+    <div class="step-dot" id="sd3"></div>
+    <div class="step-dot" id="sd4"></div>
+    <div class="step-dot" id="sd5"></div>
+    <div class="step-dot" id="sd6"></div>
+    <div class="step-dot" id="sd7"></div>
+    <span>Paso <span id="stepNum">1</span> de 7</span>
+  </div>
+</header>
+
+<!-- ── FLOW BAR ── -->
+<div class="flow-bar">
+  <div class="flow-step active" id="fb1"><span class="fs-num">1</span>Publicación</div>
+  <div class="flow-step" id="fb2"><span class="fs-num">2</span>Descubrimiento</div>
+  <div class="flow-step" id="fb3"><span class="fs-num">3</span>Postulación</div>
+  <div class="flow-step" id="fb4"><span class="fs-num">4</span>Selección</div>
+  <div class="flow-step" id="fb5"><span class="fs-num">5</span>En tránsito</div>
+  <div class="flow-step" id="fb6"><span class="fs-num">6</span>Entrega</div>
+  <div class="flow-step" id="fb7"><span class="fs-num">7</span>Completado</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── STAGE ── -->
+<div class="stage">
+
+  <!-- PHONES AREA -->
+  <div class="phones-area">
+
+    <!-- EMPRESA PHONE -->
+    <div class="phone-col">
+      <div class="phone-label"><span class="role-badge empresa">🏢 Empresa / Cliente</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+
+          <!-- STEP 1: Publicar Carga -->
+          <div class="screen-view active slide-in" id="e-step1">
+            <div class="screen-header">
+              <div class="screen-title">📦 Publicar nueva carga</div>
+            </div>
+            <div class="screen-body scrollable">
+              <div class="field-group">
+                <div class="field-label">Origen</div>
+                <div class="field-value">Arequipa, Arequipa</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Destino</div>
+                <div class="field-value">Cusco, Cusco</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Tipo de mercancía</div>
+                <div class="field-value">Electrodomésticos</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Peso / Volumen</div>
+                <div class="field-value">10 ton – 30 m³</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Fecha de recojo</div>
+                <div class="field-value">20/05/2024</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Precio referencial (S/)</div>
+                <div class="field-value">S/ 1,200</div>
+              </div>
+              <div style="margin-top:auto;padding-top:8px">
+                <button class="btn btn-primary" onclick="nextStep()">Publicar carga 🚀</button>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item active"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Mis cargas publicadas -->
+          <div class="screen-view" id="e-step2">
+            <div class="screen-header">
+              <div class="screen-title">📋 Mis Cargas</div>
+              <span class="status-pill available pulse">✓ Publicada</span>
+            </div>
+            <div class="screen-body scrollable">
+              <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div class="route-display">Arequipa <span class="route-arrow">→</span> Cusco</div>
+                  <span class="status-pill available">Disponible</span>
+                </div>
+                <div class="card-row"><span>Peso:</span><strong>10 ton</strong></div>
+                <div class="card-row"><span>Volumen:</span><strong>30 m³</strong></div>
+                <div class="card-row"><span>Fecha:</span><strong>20/05/2024</strong></div>
+                <div class="card-row"><span>Precio ref.:</span><strong class="price">S/ 1,200</strong></div>
+              </div>
+              <div class="info-box">
+                <strong>⏳ Esperando ofertas...</strong>
+                Los transportistas disponibles en esa ruta están siendo notificados ahora.
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Ofertas recibidas -->
+          <div class="screen-view" id="e-step3">
+            <div class="screen-header">
+              <div class="screen-title">📬 Ofertas Recibidas</div>
+            </div>
+            <div class="screen-body scrollable">
+              <div class="route-display" style="font-size:0.75rem;margin-bottom:8px">Arequipa <span class="route-arrow">→</span> Cusco &nbsp;|&nbsp; <span class="tag green">3 ofertas</span></div>
+              <div class="offer-card selected" onclick="selectOffer(this)">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">⭐ Transportes Andinos SAC</div>
+                  <div class="offer-price">S/ 1,150</div>
+                </div>
+                <div class="offer-detail">⭐⭐⭐⭐⭐ 4.8 · Furgón 10 ton · Llega en 2 h</div>
+                <div class="offer-detail">💬 "Excelente servicio, 100% recomendado."</div>
+              </div>
+              <div class="offer-card" onclick="selectOffer(this)">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">Logística del Sur EIRL</div>
+                  <div class="offer-price">S/ 1,200</div>
+                </div>
+                <div class="offer-detail">⭐⭐⭐⭐ 4.6 · Furgón 8 ton · Llega en 3 h</div>
+              </div>
+              <div class="offer-card" onclick="selectOffer(this)">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">Transportes Cusco Express</div>
+                  <div class="offer-price">S/ 1,100</div>
+                </div>
+                <div class="offer-detail">⭐⭐⭐⭐ 4.4 · Furgón 12 ton · Llega en 3.5 h</div>
+              </div>
+              <button class="btn btn-primary" onclick="nextStep()" style="margin-top:6px">Seleccionar transportista ✓</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Transportista seleccionado -->
+          <div class="screen-view" id="e-step4">
+            <div class="screen-header">
+              <div class="screen-title">✅ Transportista Asignado</div>
+            </div>
+            <div class="screen-body">
+              <div class="card">
+                <div class="card-title">Transportes Andinos SAC</div>
+                <div class="card-row"><span>Calificación:</span><strong>⭐ 4.8 (120)</strong></div>
+                <div class="card-row"><span>Camión:</span><strong>Furgón 10 ton</strong></div>
+                <div class="card-row"><span>Placa:</span><strong>VSB-125</strong></div>
+                <div class="card-row"><span>Conductor:</span><strong>Juan Pérez</strong></div>
+                <hr class="divider">
+                <div class="card-row"><span>Precio acordado:</span><strong class="price">S/ 1,150</strong></div>
+                <div class="card-row"><span>ETA:</span><strong>Llega en 2 horas</strong></div>
+              </div>
+              <div class="info-box" style="background:#FFF3E0;color:#E65100">
+                <strong>📋 Contrato generado</strong>
+                Se ha enviado el contrato de transporte digital al conductor.
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 5: Seguimiento en tiempo real -->
+          <div class="screen-view" id="e-step5">
+            <div class="screen-header blue-header">
+              <div class="screen-title">📍 En Tránsito</div>
+              <span class="status-pill transit pulse">🔵 En ruta</span>
+            </div>
+            <div class="screen-body">
+              <div class="map-placeholder">
+                <div class="map-road"></div>
+                <div class="map-truck" id="mapTruck" style="left:30%">🚛</div>
+                <div style="position:absolute;left:8%;top:30%;font-size:0.7rem">📍 AQP</div>
+                <div style="position:absolute;right:6%;top:30%;font-size:0.7rem">🏁 CUS</div>
+              </div>
+              <div class="card" style="margin-top:6px">
+                <div class="card-title">Arequipa → Cusco</div>
+                <div class="card-row"><span>Conductor:</span><strong>Juan Pérez ⭐ 4.8</strong></div>
+                <div class="card-row"><span>Llegada estimada:</span><strong>21/05 – 14:30</strong></div>
+                <div class="card-row"><span>Estado:</span><strong style="color:var(--blue)">🔵 En tránsito</strong></div>
+              </div>
+              <div class="tracking-row"><div class="tracking-dot done-dot"></div><div>✅ Carga recogida en Arequipa</div></div>
+              <div class="tracking-row"><div class="tracking-dot current-dot"></div><div>🔄 En camino hacia Cusco</div></div>
+              <div class="tracking-row"><div class="tracking-dot"></div><div style="color:var(--gray-400)">⏳ Entrega en destino</div></div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 6: Confirmar Entrega -->
+          <div class="screen-view" id="e-step6">
+            <div class="screen-header">
+              <div class="screen-title">📦 Confirmar Entrega</div>
+            </div>
+            <div class="screen-body">
+              <div class="card">
+                <div class="card-title">¿La carga fue entregada correctamente?</div>
+                <div class="card-row" style="margin-bottom:8px"><span>Ruta:</span><strong>Arequipa → Cusco</strong></div>
+                <div class="photo-placeholder">📷 Adjuntar evidencia (opcional)</div>
+              </div>
+              <button class="btn btn-primary" onclick="nextStep()" style="margin-bottom:6px">✅ Sí, entregar carga</button>
+              <button class="btn btn-danger">❌ No, hubo un problema</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 7: Completado Empresa -->
+          <div class="screen-view" id="e-step7">
+            <div class="screen-header">
+              <div class="screen-title">🎉 Completado</div>
+            </div>
+            <div class="screen-body">
+              <div class="success-center">
+                <div class="success-icon">✅</div>
+                <div class="success-title">¡Entrega Completada!</div>
+                <div class="success-sub">El pago ha sido liberado al transportista.</div>
+              </div>
+              <div class="card">
+                <div class="card-title">Resumen del viaje</div>
+                <div class="card-row"><span>Ruta:</span><strong>Arequipa → Cusco</strong></div>
+                <div class="card-row"><span>Precio acordado:</span><strong class="price">S/ 1,150</strong></div>
+                <div class="card-row"><span>Fecha completada:</span><strong>21/05/2024</strong></div>
+              </div>
+              <div style="padding:10px 0">
+                <div style="font-size:0.72rem;font-weight:600;color:var(--gray-600);margin-bottom:8px;text-align:center">Califica al transportista</div>
+                <div class="rating-stars" style="display:flex;justify-content:center" id="eRating">
+                  <button onclick="rateE(1)">★</button><button onclick="rateE(2)">★</button>
+                  <button onclick="rateE(3)">★</button><button onclick="rateE(4)" class="lit">★</button>
+                  <button onclick="rateE(5)" class="lit">★</button>
+                </div>
+              </div>
+              <button class="btn btn-primary">Calificar transportista</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item active"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+        </div><!-- /phone-screen -->
+      </div><!-- /phone -->
+    </div><!-- /phone-col -->
+
+    <!-- CONNECTOR -->
+    <div class="phones-connector">
+      <div class="connector-line"></div>
+      <div class="connector-arrow" id="connArrow">⟷</div>
+      <div class="connector-label" id="connLabel">Sincronizando<br>plataforma</div>
+      <div class="connector-line"></div>
+    </div>
+
+    <!-- TRANSPORTISTA PHONE -->
+    <div class="phone-col">
+      <div class="phone-label"><span class="role-badge transportista">🚛 Transportista</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+
+          <!-- STEP 1: Publicar Ruta -->
+          <div class="screen-view active slide-in" id="t-step1">
+            <div class="screen-header" style="background:var(--green-mid)">
+              <div class="screen-title">🚛 Nueva Ruta de Retorno</div>
+            </div>
+            <div class="screen-body scrollable">
+              <div class="field-group">
+                <div class="field-label">Ubicación actual</div>
+                <div class="field-value">Arequipa, Arequipa</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Destino final</div>
+                <div class="field-value">Cusco, Cusco</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Fecha de salida</div>
+                <div class="field-value">20/05/2024</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Tipo de vehículo</div>
+                <div class="field-value">Furgón</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Capacidad disponible</div>
+                <div class="field-value">10 ton / 30 m³</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Precio mínimo (S/)</div>
+                <div class="field-value">S/ 1,000</div>
+              </div>
+              <div style="margin-top:auto;padding-top:8px">
+                <button class="btn btn-primary" onclick="null" style="opacity:0.4;pointer-events:none">Publicar ruta</button>
+                <div style="text-align:center;font-size:0.62rem;color:var(--gray-400);margin-top:6px">← La empresa publica primero</div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item active"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Cargas Disponibles -->
+          <div class="screen-view" id="t-step2">
+            <div class="screen-header" style="background:var(--green-mid)">
+              <div class="screen-title">🔍 Cargas Disponibles</div>
+            </div>
+            <div class="screen-body scrollable">
+              <div style="display:flex;gap:6px;margin-bottom:8px">
+                <div class="field-value" style="flex:1;font-size:0.65rem">🔍 Arequipa → Cusco</div>
+                <div class="tag">Filtros</div>
+              </div>
+              <div class="offer-card selected">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">Arequipa → Cusco</div>
+                  <div class="offer-price">S/ 1,200</div>
+                </div>
+                <div class="offer-detail">10 ton – 30 m³ · 20/05/2024</div>
+                <div class="offer-detail">📍 Recoge: Arequipa</div>
+                <div style="margin-top:4px"><span class="tag green">Electrodomésticos</span></div>
+              </div>
+              <div class="offer-card">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">Lima → Trujillo</div>
+                  <div class="offer-price">S/ 800</div>
+                </div>
+                <div class="offer-detail">5 ton – 15 m³ · 22/05/2024</div>
+                <div class="offer-detail">📍 Recoge: Lima</div>
+              </div>
+              <div class="offer-card">
+                <div style="display:flex;justify-content:space-between">
+                  <div class="offer-company">Arequipa → Lima</div>
+                  <div class="offer-price">S/ 2,100</div>
+                </div>
+                <div class="offer-detail">8 ton – 25 m³ · 21/05/2024</div>
+                <div class="offer-detail">📍 Recoge: Arequipa</div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Enviar Oferta -->
+          <div class="screen-view" id="t-step3">
+            <div class="screen-header" style="background:var(--green-mid)">
+              <div class="screen-title">✉️ Enviar Oferta</div>
+            </div>
+            <div class="screen-body">
+              <div class="card">
+                <div class="card-title">Arequipa → Cusco</div>
+                <div class="card-row"><span>Carga:</span><strong>10 ton – 30 m³</strong></div>
+                <div class="card-row"><span>Fecha:</span><strong>20/05/2024</strong></div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Precio ofertado (S/)</div>
+                <div class="field-value" style="color:var(--green-mid);font-weight:700">S/ 1,150</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Tiempo estimado de llegada</div>
+                <div class="field-value">2.5 horas</div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">Mensaje (opcional)</div>
+                <div class="field-value" style="color:var(--gray-600);font-style:italic">"Estoy disponible para el recojo en la fecha indicada."</div>
+              </div>
+              <div style="margin-top:auto">
+                <button class="btn btn-primary" onclick="nextStep()">Enviar oferta 📤</button>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 4: Esperando confirmación -->
+          <div class="screen-view" id="t-step4">
+            <div class="screen-header" style="background:var(--green-mid)">
+              <div class="screen-title">📋 Mis Cargas</div>
+            </div>
+            <div class="screen-body">
+              <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div class="route-display" style="font-size:0.72rem">Arequipa <span class="route-arrow">→</span> Cusco</div>
+                  <span class="status-pill pending pulse">⏳ Pendiente</span>
+                </div>
+                <div class="card-row"><span>Peso:</span><strong>10 ton – 30 m³</strong></div>
+                <div class="card-row"><span>Tu oferta:</span><strong class="price">S/ 1,150</strong></div>
+                <div class="card-row"><span>Enviada:</span><strong>20/05/2024</strong></div>
+              </div>
+              <div class="info-box">
+                <strong>⏳ Esperando respuesta...</strong>
+                La empresa está revisando tu oferta junto con otros transportistas.
+              </div>
+              <div style="font-size:0.65rem;color:var(--gray-400);text-align:center;margin-top:6px">Otras cargas encontradas:</div>
+              <div class="offer-card" style="opacity:0.5">
+                <div class="offer-company">Lima → Trujillo · S/ 750</div>
+                <div class="offer-detail">5 ton · 22/05/2024</div>
+              </div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 5: Carga asignada / En tránsito -->
+          <div class="screen-view" id="t-step5">
+            <div class="screen-header" style="background:var(--green-action);color:var(--green-dark)">
+              <div class="screen-title" style="color:var(--green-dark)">🎉 ¡Carga Asignada!</div>
+            </div>
+            <div class="screen-body">
+              <div class="card" style="border-color:var(--green-action);background:var(--green-light)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <div class="route-display">Arequipa <span class="route-arrow">→</span> Cusco</div>
+                  <span class="status-pill available">✓ Aceptada</span>
+                </div>
+                <div class="card-row"><span>Peso:</span><strong>10 ton – 30 m³</strong></div>
+                <div class="card-row"><span>Precio acordado:</span><strong class="price">S/ 1,150</strong></div>
+                <div style="margin-top:4px"><div class="stars">⭐⭐⭐⭐⭐</div></div>
+              </div>
+              <div class="card">
+                <div class="card-row"><span>Recojo:</span><strong>26/05/2024 – 10:00</strong></div>
+                <div class="card-row"><span>Contacto:</span><strong>María Fernández</strong></div>
+                <div class="card-row"><span>Empresa:</span><strong>Industrias Andinas SAC</strong></div>
+              </div>
+              <button class="btn btn-primary" onclick="nextStep()">Ver detalles del viaje 🗺️</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 6: En tránsito (transportista) -->
+          <div class="screen-view" id="t-step6">
+            <div class="screen-header blue-header">
+              <div class="screen-title">🗺️ Viaje en Curso</div>
+            </div>
+            <div class="screen-body">
+              <div class="map-placeholder">
+                <div class="map-road"></div>
+                <div class="map-truck" style="left:60%">🚛</div>
+                <div style="position:absolute;left:8%;top:30%;font-size:0.7rem">📍 AQP</div>
+                <div style="position:absolute;right:6%;top:30%;font-size:0.7rem">🏁 CUS</div>
+              </div>
+              <div class="card" style="margin-top:6px">
+                <div class="card-title">Arequipa → Cusco</div>
+                <div class="card-row"><span>Empresa:</span><strong>Industrias Andinas SAC</strong></div>
+                <div class="card-row"><span>Llegada estimada:</span><strong>21/05 – 14:30</strong></div>
+                <div class="card-row"><span>Modo:</span><strong>🚗 Auto</strong></div>
+              </div>
+              <div class="tracking-row"><div class="tracking-dot done-dot"></div><div>✅ Carga recogida</div></div>
+              <div class="tracking-row"><div class="tracking-dot current-dot"></div><div>🔄 En camino al destino</div></div>
+              <div class="tracking-row"><div class="tracking-dot"></div><div style="color:var(--gray-400)">⏳ Entrega pendiente</div></div>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item active"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+          <!-- STEP 7: Entrega y Pago -->
+          <div class="screen-view" id="t-step7">
+            <div class="screen-header" style="background:var(--green-action)">
+              <div class="screen-title" style="color:var(--green-dark)">💰 Entrega Completada</div>
+            </div>
+            <div class="screen-body">
+              <div class="success-center" style="flex:none;padding:14px 0 6px">
+                <div class="success-icon">🎉</div>
+                <div class="success-title">¡Buen trabajo!</div>
+                <div class="success-sub">La entrega ha sido confirmada por la empresa.</div>
+              </div>
+              <div class="card" style="border-color:var(--green-action);background:var(--green-light)">
+                <div class="card-row"><span>Pago recibido:</span><strong class="price" style="font-size:1.1rem">S/ 1,150</strong></div>
+                <div class="card-row"><span>Ruta:</span><strong>Arequipa → Cusco</strong></div>
+                <div class="card-row"><span>Completado:</span><strong>21/05/2024</strong></div>
+              </div>
+              <div style="font-size:0.72rem;font-weight:600;color:var(--gray-600);margin:8px 0 4px;text-align:center">Califica a la empresa</div>
+              <div class="rating-stars" style="display:flex;justify-content:center;margin-bottom:10px" id="tRating">
+                <button onclick="rateT(1)">★</button><button onclick="rateT(2)">★</button>
+                <button onclick="rateT(3)">★</button><button onclick="rateT(4)" class="lit">★</button>
+                <button onclick="rateT(5)" class="lit">★</button>
+              </div>
+              <button class="btn btn-primary">Finalizar ✓</button>
+            </div>
+            <div class="bottom-nav">
+              <div class="nav-item active"><div class="nav-icon">🏠</div>Inicio</div>
+              <div class="nav-item"><div class="nav-icon">📦</div>Cargas</div>
+              <div class="nav-item"><div class="nav-icon" style="margin-bottom:2px"><div class="nav-pub">＋</div></div>Publicar</div>
+              <div class="nav-item"><div class="nav-icon">💬</div>Mensajes</div>
+              <div class="nav-item"><div class="nav-icon">👤</div>Perfil</div>
+            </div>
+          </div>
+
+        </div><!-- /phone-screen -->
+      </div><!-- /phone -->
+    </div><!-- /phone-col -->
+
+  </div><!-- /phones-area -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Flujo del proceso</div>
+      <button class="flow-btn current" id="sb1" onclick="goToStep(1)">
+        <span class="fb-num">1</span>
+        <div><div class="fb-text">Publicación</div><div class="fb-sub">Empresa publica la carga</div></div>
+      </button>
+      <button class="flow-btn" id="sb2" onclick="goToStep(2)">
+        <span class="fb-num">2</span>
+        <div><div class="fb-text">Descubrimiento</div><div class="fb-sub">Transportista ve la oferta</div></div>
+      </button>
+      <button class="flow-btn" id="sb3" onclick="goToStep(3)">
+        <span class="fb-num">3</span>
+        <div><div class="fb-text">Postulación</div><div class="fb-sub">Transportista envía oferta</div></div>
+      </button>
+      <button class="flow-btn" id="sb4" onclick="goToStep(4)">
+        <span class="fb-num">4</span>
+        <div><div class="fb-text">Selección</div><div class="fb-sub">Empresa elige transportista</div></div>
+      </button>
+      <button class="flow-btn" id="sb5" onclick="goToStep(5)">
+        <span class="fb-num">5</span>
+        <div><div class="fb-text">En tránsito</div><div class="fb-sub">Seguimiento en tiempo real</div></div>
+      </button>
+      <button class="flow-btn" id="sb6" onclick="goToStep(6)">
+        <span class="fb-num">6</span>
+        <div><div class="fb-text">Entrega</div><div class="fb-sub">Confirmación de entrega</div></div>
+      </button>
+      <button class="flow-btn" id="sb7" onclick="goToStep(7)">
+        <span class="fb-num">7</span>
+        <div><div class="fb-text">Completado</div><div class="fb-sub">Pago liberado y calificación</div></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="big-next-btn" id="nextBtn" onclick="nextStep()">
+        Siguiente paso →
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="info-box" id="stepInfo">
+        <strong>Paso 1 — Publicación</strong>
+        La empresa crea una publicación con los detalles del flete: origen, destino, tipo de carga y precio referencial.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<script>
+let currentStep = 1;
+const TOTAL = 7;
+
+const stepMessages = [
+  '',
+  { title: 'Paso 1 — Publicación', body: 'La empresa crea una publicación con los detalles del flete: origen, destino, tipo de carga y precio referencial.' },
+  { title: 'Paso 2 — Descubrimiento', body: 'El transportista con una ruta de retorno compatible ve la carga disponible y analiza si le conviene.' },
+  { title: 'Paso 3 — Postulación', body: 'El transportista envía su oferta con el precio y tiempo estimado. La empresa recibe la propuesta.' },
+  { title: 'Paso 4 — Selección', body: 'La empresa revisa todas las ofertas y selecciona al mejor transportista según precio, calificación y tiempo.' },
+  { title: 'Paso 5 — En tránsito', body: 'El viaje está en curso. Ambas partes pueden ver el estado en tiempo real con el mapa de seguimiento.' },
+  { title: 'Paso 6 — Entrega', body: 'Al llegar al destino, la empresa confirma la entrega. Se puede adjuntar evidencia fotográfica.' },
+  { title: 'Paso 7 — Completado', body: 'Viaje finalizado. El pago se libera automáticamente al transportista. Ambos se califican mutuamente.' },
+];
+
+const toastMessages = [
+  '',
+  '📦 ¡Carga publicada exitosamente!',
+  '🔔 Transportistas notificados en la ruta',
+  '📤 ¡Oferta enviada a la empresa!',
+  '✅ ¡Transportista seleccionado!',
+  '🚛 Viaje iniciado — seguimiento activo',
+  '📦 Entrega confirmada',
+  '🎉 ¡Proceso completado! Pago liberado',
+];
+
+const connectorLabels = [
+  '', 'Empresa publica\nla carga', 'Transportista\ndescubre la carga',
+  'Oferta enviada\na la empresa', 'Empresa selecciona\nal transportista',
+  'Seguimiento\nen tiempo real', 'Entrega\nconfirmada', 'Pago\nliberado ✓'
+];
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function updateUI(step) {
+  // Flow bar
+  for (let i = 1; i <= TOTAL; i++) {
+    const fb = document.getElementById('fb' + i);
+    fb.className = 'flow-step';
+    if (i < step) fb.classList.add('done');
+    else if (i === step) fb.classList.add('active');
+  }
+
+  // Step dots
+  for (let i = 1; i <= TOTAL; i++) {
+    const sd = document.getElementById('sd' + i);
+    sd.className = 'step-dot' + (i <= step ? ' active' : '');
+  }
+  document.getElementById('stepNum').textContent = step;
+
+  // Sidebar buttons
+  for (let i = 1; i <= TOTAL; i++) {
+    const sb = document.getElementById('sb' + i);
+    sb.className = 'flow-btn' + (i === step ? ' current' : '');
+    sb.querySelector('.fb-num').style.background = i === step ? 'var(--green-action)' : '';
+    sb.querySelector('.fb-num').style.color = i === step ? 'white' : '';
+  }
+
+  // Info box
+  const info = stepMessages[step];
+  document.getElementById('stepInfo').innerHTML = `<strong>${info.title}</strong>${info.body}`;
+
+  // Screen views
+  for (let i = 1; i <= TOTAL; i++) {
+    const eView = document.getElementById('e-step' + i);
+    const tView = document.getElementById('t-step' + i);
+    eView.className = 'screen-view' + (i === step ? ' active slide-in' : '');
+    tView.className = 'screen-view' + (i === step ? ' active slide-in' : '');
+  }
+
+  // Connector label
+  document.getElementById('connLabel').textContent = connectorLabels[step];
+
+  // Next btn
+  const btn = document.getElementById('nextBtn');
+  if (step >= TOTAL) {
+    btn.textContent = '↩ Reiniciar demo';
+    btn.onclick = resetDemo;
+  } else {
+    btn.textContent = 'Siguiente paso →';
+    btn.onclick = nextStep;
+  }
+
+  // Animate map truck at step 5
+  if (step === 5) {
+    setTimeout(() => {
+      const truck = document.getElementById('mapTruck');
+      if (truck) truck.style.left = '65%';
+    }, 800);
+  }
+}
+
+function nextStep() {
+  if (currentStep < TOTAL) {
+    currentStep++;
+    showToast(toastMessages[currentStep]);
+    updateUI(currentStep);
+  } else {
+    resetDemo();
+  }
+}
+
+function goToStep(step) {
+  currentStep = step;
+  updateUI(step);
+}
+
+function resetDemo() {
+  currentStep = 1;
+  updateUI(1);
+  showToast('🔄 Demo reiniciada desde el principio');
+}
+
+function selectOffer(el) {
+  document.querySelectorAll('.offer-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function rateE(n) {
+  document.querySelectorAll('#eRating button').forEach((b, i) => {
+    b.classList.toggle('lit', i < n);
+  });
+}
+
+function rateT(n) {
+  document.querySelectorAll('#tRating button').forEach((b, i) => {
+    b.classList.toggle('lit', i < n);
+  });
+}
+
+// Init
+updateUI(1);
+</script>
+</body>
+</html>
