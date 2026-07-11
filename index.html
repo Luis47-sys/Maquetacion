@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CargaYa — Ningún viaje de vuelta vacío</title>
+<meta name="description" content="CargaYa conecta empresas con transportistas que regresan vacíos. Cero viajes en blanco, más rentabilidad para todos.">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!-- Styles -->
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ LOADER GLOBAL ============ -->
+<div id="global-loader" class="global-loader">
+  <div class="loader-truck">
+    <i class="fa-solid fa-truck-fast"></i>
+  </div>
+  <div class="loader-road"></div>
+  <p>Cargando CargaYa…</p>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ============ MODAL ROOT ============ -->
+<div id="modal-root" class="modal-root"></div>
+
+<!-- ======================================================================
+     NAVBAR (visible en landing y sirve de referencia visual)
+====================================================================== -->
+<header id="navbar" class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="brand" data-nav="landing">
+      <span class="brand-mark"><i class="fa-solid fa-truck-arrow-right"></i></span>
+      <span class="brand-name">Carga<em>Ya</em></span>
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="#beneficios" class="nav-link">Beneficios</a>
+      <a href="#como-funciona" class="nav-link">Cómo funciona</a>
+      <a href="#testimonios" class="nav-link">Testimonios</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="icon-btn" id="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <div class="lang-switch" id="lang-switch" title="Idioma">
+        <button class="lang-btn active" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+      <button class="btn btn-ghost" data-action="open-login">Iniciar sesión</button>
+      <button class="btn btn-primary" data-action="open-register">Crear cuenta</button>
+    </div>
+
+    <button class="burger" id="burger-btn" aria-label="Menú"><i class="fa-solid fa-bars"></i></button>
+  </div>
+</header>
+
+<!-- ======================================================================
+     APP CONTAINER — todas las "pantallas" viven aquí y se alternan por JS
+====================================================================== -->
+<main id="app">
+
+<!-- ==================== LANDING ==================== -->
+<section id="screen-landing" class="screen active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-route" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="none" class="route-svg">
+        <path id="route-path" d="M -50 220 C 200 220, 250 60, 500 100 S 850 260, 1250 80" />
+      </svg>
+      <div class="route-truck" id="route-truck"><i class="fa-solid fa-truck"></i></div>
+    </div>
+
+    <div class="hero-inner">
+      <span class="eyebrow"><i class="fa-solid fa-route"></i> Logística inteligente de retorno</span>
+      <h1 class="hero-title">Ningún camión<br><span class="accent-text">vuelve vacío.</span></h1>
+      <p class="hero-sub">CargaYa conecta empresas que necesitan transportar mercancía con transportistas que ya vuelven por esa ruta. Menos costos, más viajes rentables, cero kilómetros desperdiciados.</p>
+
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" data-action="open-register" data-role-hint="empresa">
+          <i class="fa-solid fa-boxes-stacked"></i> Publicar una carga
+        </button>
+        <button class="btn btn-outline btn-lg" data-action="open-register" data-role-hint="transportista">
+          <i class="fa-solid fa-truck-fast"></i> Ofrecer mi viaje de vuelta
+        </button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num" data-count="4820">0</span><span class="stat-label">Viajes conectados</span></div>
+        <div class="stat"><span class="stat-num" data-count="1260">0</span><span class="stat-label">Empresas activas</span></div>
+        <div class="stat"><span class="stat-num" data-count="98">0</span><span class="stat-label">% de retorno ocupado</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS / TRUST -->
+  <section class="trust-strip">
+    <p>Transportistas y empresas que ya confían en CargaYa</p>
+    <div class="trust-logos">
+      <span><i class="fa-solid fa-industry"></i> Andes Logística</span>
+      <span><i class="fa-solid fa-warehouse"></i> ExpoCarga SAC</span>
+      <span><i class="fa-solid fa-truck-ramp-box"></i> TransPacífico</span>
+      <span><i class="fa-solid fa-boxes-packing"></i> Ruta Norte</span>
+      <span><i class="fa-solid fa-ship"></i> Puerto Sur</span>
+    </div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section id="beneficios" class="section">
+    <div class="section-head">
+      <span class="eyebrow">Beneficios</span>
+      <h2>Todos ganan cuando nadie vuelve vacío</h2>
+      <p class="section-sub">Un mismo viaje, dos necesidades resueltas.</p>
+    </div>
+    <div class="cards-grid benefits-grid">
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+        <h3>Reduce costos</h3>
+        <p>Los transportistas rentabilizan el tramo de vuelta y las empresas pagan menos que un flete exclusivo.</p>
+      </div>
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-leaf"></i></div>
+        <h3>Menos huella de carbono</h3>
+        <p>Cada viaje de retorno ocupado es un viaje en vacío menos contaminando la ruta.</p>
+      </div>
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-bolt"></i></div>
+        <h3>Matching instantáneo</h3>
+        <p>Nuestro sistema cruza origen, destino, fecha, peso y tipo de vehículo en segundos.</p>
+      </div>
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Seguridad y trazabilidad</h3>
+        <p>Seguimiento del estado de cada carga, chat directo y calificaciones verificadas.</p>
+      </div>
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+        <h3>Visibilidad total</h3>
+        <p>Mapa en vivo simulado con origen, destino y ruta estimada de cada envío.</p>
+      </div>
+      <div class="glass-card benefit-card">
+        <div class="benefit-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Reportes accionables</h3>
+        <p>Estadísticas de ingresos, kilómetros y desempeño listas para exportar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="section section-alt">
+    <div class="section-head">
+      <span class="eyebrow">Proceso</span>
+      <h2>Cómo funciona CargaYa</h2>
+      <p class="section-sub">Cuatro pasos y tu carga ya tiene transportista.</p>
+    </div>
+    <div class="steps-track">
+      <div class="steps-line"></div>
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <div class="step-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
+        <h3>Publica</h3>
+        <p>La empresa publica su carga o el transportista su viaje de retorno.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <div class="step-icon"><i class="fa-solid fa-magnifying-glass-location"></i></div>
+        <h3>Matching</h3>
+        <p>CargaYa cruza rutas, fechas y capacidad para sugerir la mejor coincidencia.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <div class="step-icon"><i class="fa-solid fa-handshake"></i></div>
+        <h3>Acuerdan</h3>
+        <p>Ambas partes chatean, negocian y aceptan la propuesta desde la app.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04</div>
+        <div class="step-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h3>Entregan</h3>
+        <p>Se hace seguimiento en tiempo real hasta marcar la carga como entregada.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <section id="testimonios" class="section">
+    <div class="section-head">
+      <span class="eyebrow">Testimonios</span>
+      <h2>Lo que dicen en la ruta</h2>
+    </div>
+    <div class="testimonial-track" id="testimonial-track">
+      <!-- generado por JS -->
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section section-alt">
+    <div class="section-head">
+      <span class="eyebrow">FAQ</span>
+      <h2>Preguntas frecuentes</h2>
+    </div>
+    <div class="faq-list" id="faq-list">
+      <!-- generado por JS -->
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <div class="glass-card cta-card">
+      <h2>Tu próximo viaje de vuelta ya te está esperando</h2>
+      <p>Únete gratis y publica tu primera carga o viaje en menos de dos minutos.</p>
+      <button class="btn btn-primary btn-lg" data-action="open-register"><i class="fa-solid fa-rocket"></i> Empezar ahora</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="brand"><span class="brand-mark"><i class="fa-solid fa-truck-arrow-right"></i></span><span class="brand-name">Carga<em>Ya</em></span></a>
+        <p>La plataforma que elimina los viajes de retorno vacíos en Latinoamérica.</p>
+        <div class="socials">
+          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <a href="#beneficios">Beneficios</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#testimonios">Testimonios</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <a href="#">Sobre nosotros</a>
+        <a href="#">Carreras</a>
+        <a href="#">Prensa</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 CargaYa. Prototipo demostrativo — todos los datos son simulados.</p>
+    </div>
+  </footer>
+</section>
+
+<!-- ==================== APP SHELL (para dashboards) ==================== -->
+<div id="app-shell" class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="#" class="brand sidebar-brand" data-nav="landing">
+      <span class="brand-mark"><i class="fa-solid fa-truck-arrow-right"></i></span>
+      <span class="brand-name">Carga<em>Ya</em></span>
+    </a>
+    <nav class="sidebar-nav" id="sidebar-nav"><!-- generado por JS según rol --></nav>
+    <div class="sidebar-footer">
+      <button class="icon-btn" id="theme-toggle-2" title="Cambiar tema"><i class="fa-solid fa-moon"></i></button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+    </div>
+  </aside>
+
+  <!-- TOPBAR + CONTENT -->
+  <div class="shell-main">
+    <header class="topbar">
+      <button class="icon-btn only-mobile" id="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+      <div class="global-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="global-search-input" placeholder="Buscar cargas, viajes, transportistas, empresas…">
+      </div>
+      <div class="topbar-actions">
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notif-bell"><i class="fa-solid fa-bell"></i><span class="notif-badge" id="notif-count">0</span></button>
+          <div class="notif-dropdown" id="notif-dropdown">
+            <div class="notif-dropdown-head"><span>Notificaciones</span><button id="notif-clear">Limpiar</button></div>
+            <div class="notif-list" id="notif-list"></div>
+          </div>
+        </div>
+        <div class="user-chip" id="user-chip">
+          <img id="user-avatar" src="" alt="avatar">
+          <div class="user-chip-text">
+            <strong id="user-chip-name">—</strong>
+            <span id="user-chip-role">—</span>
+          </div>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell-content" id="shell-content">
+      <!-- ============ PANTALLAS DEL DASHBOARD (todas viven aquí, se togglean) ============ -->
+
+      <!-- EMPRESA: overview -->
+      <section id="view-empresa-home" class="view">
+        <div class="view-head">
+          <div><h1>Hola, <span id="empresa-nombre-home">Empresa</span> 👋</h1><p class="muted">Este es el resumen de tu actividad en CargaYa.</p></div>
+          <button class="btn btn-primary" data-action="open-publicar-carga"><i class="fa-solid fa-plus"></i> Publicar carga</button>
+        </div>
+        <div class="kpi-grid" id="empresa-kpis"></div>
+        <div class="grid-2">
+          <div class="glass-card panel">
+            <div class="panel-head"><h3>Publicaciones recientes</h3><a data-nav="empresa-publicaciones">Ver todas</a></div>
+            <div id="empresa-recientes" class="mini-list"></div>
+          </div>
+          <div class="glass-card panel">
+            <div class="panel-head"><h3>Mapa de operaciones</h3></div>
+            <div id="map-empresa-home" class="map-box"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EMPRESA: publicaciones -->
+      <section id="view-empresa-publicaciones" class="view">
+        <div class="view-head">
+          <div><h1>Mis publicaciones</h1><p class="muted">Gestiona, edita y da seguimiento a tus cargas.</p></div>
+          <button class="btn btn-primary" data-action="open-publicar-carga"><i class="fa-solid fa-plus"></i> Nueva carga</button>
+        </div>
+        <div class="filters-bar">
+          <input type="text" class="input" id="filtro-carga-texto" placeholder="Buscar por origen, destino o empresa…">
+          <select class="input" id="filtro-carga-estado">
+            <option value="">Todos los estados</option>
+          </select>
+          <select class="input" id="filtro-carga-vehiculo">
+            <option value="">Todos los vehículos</option>
+          </select>
+        </div>
+        <div class="cards-grid" id="empresa-publicaciones-grid"></div>
+      </section>
+
+      <!-- EMPRESA: buscar transportistas -->
+      <section id="view-empresa-buscar" class="view">
+        <div class="view-head"><div><h1>Buscar transportistas</h1><p class="muted">Filtra por ruta, vehículo y disponibilidad.</p></div></div>
+        <div class="filters-bar">
+          <input type="text" class="input" id="buscar-transportista-texto" placeholder="Buscar por nombre, origen o destino…">
+          <select class="input" id="buscar-transportista-vehiculo"><option value="">Todos los vehículos</option></select>
+        </div>
+        <div class="cards-grid" id="transportistas-grid"></div>
+      </section>
+
+      <!-- EMPRESA: historial -->
+      <section id="view-empresa-historial" class="view">
+        <div class="view-head"><div><h1>Historial</h1><p class="muted">Todas tus cargas pasadas.</p></div>
+          <div class="export-actions">
+            <button class="btn btn-outline btn-sm" data-action="export-pdf" data-table="tabla-historial-empresa"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline btn-sm" data-action="export-excel" data-table="tabla-historial-empresa"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          </div>
+        </div>
+        <div class="table-toolbar">
+          <input type="text" class="input" id="historial-empresa-buscar" placeholder="Buscar en historial…">
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="tabla-historial-empresa">
+            <thead><tr>
+              <th data-sort="id">ID</th><th data-sort="origen">Origen</th><th data-sort="destino">Destino</th>
+              <th data-sort="fecha">Fecha</th><th data-sort="transportista">Transportista</th><th data-sort="precio">Precio</th><th data-sort="estado">Estado</th>
+            </tr></thead>
+            <tbody id="historial-empresa-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="historial-empresa-pag"></div>
+      </section>
+
+      <!-- COMPARTIDO: matching -->
+      <section id="view-matching" class="view">
+        <div class="view-head"><div><h1>Coincidencias encontradas</h1><p class="muted">CargaYa cruzó tus datos y encontró estas opciones.</p></div>
+          <button class="btn btn-outline" data-action="rerun-matching"><i class="fa-solid fa-rotate"></i> Buscar de nuevo</button>
+        </div>
+        <div id="matching-loading" class="matching-loading hidden">
+          <div class="pulse-dot"></div><div class="pulse-dot"></div><div class="pulse-dot"></div>
+          <span>Cruzando rutas, fechas y vehículos…</span>
+        </div>
+        <div class="cards-grid" id="matching-grid"></div>
+      </section>
+
+      <!-- COMPARTIDO: chat -->
+      <section id="view-chat" class="view">
+        <div class="chat-shell">
+          <aside class="chat-list-panel">
+            <div class="chat-list-head"><h3>Chats</h3></div>
+            <div class="chat-list" id="chat-list"></div>
+          </aside>
+          <div class="chat-window">
+            <div class="chat-window-head" id="chat-window-head">Selecciona una conversación</div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-bar">
+              <button class="icon-btn" id="chat-attach"><i class="fa-solid fa-paperclip"></i></button>
+              <button class="icon-btn" id="chat-location"><i class="fa-solid fa-location-dot"></i></button>
+              <input type="text" id="chat-input" placeholder="Escribe un mensaje…">
+              <button class="icon-btn primary" id="chat-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPARTIDO: perfil -->
+      <section id="view-perfil" class="view">
+        <div class="view-head"><div><h1>Mi perfil</h1><p class="muted">Actualiza tus datos y foto.</p></div></div>
+        <div class="grid-2">
+          <div class="glass-card panel" id="perfil-form-wrap"></div>
+          <div class="glass-card panel">
+            <div class="panel-head"><h3>Seguridad</h3></div>
+            <form id="form-password" class="form-grid">
+              <label>Contraseña actual<input class="input" type="password" required></label>
+              <label>Nueva contraseña<input class="input" type="password" required minlength="6"></label>
+              <label>Confirmar nueva contraseña<input class="input" type="password" required minlength="6"></label>
+              <button class="btn btn-primary" type="submit"><i class="fa-solid fa-key"></i> Cambiar contraseña</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPARTIDO: configuración -->
+      <section id="view-config" class="view">
+        <div class="view-head"><div><h1>Configuración</h1><p class="muted">Preferencias de la cuenta.</p></div></div>
+        <div class="glass-card panel">
+          <div class="settings-row"><div><strong>Modo oscuro</strong><p class="muted-sm">Cambia la apariencia de toda la plataforma.</p></div><label class="switch"><input type="checkbox" id="config-dark"><span class="slider"></span></label></div>
+          <div class="settings-row"><div><strong>Notificaciones push simuladas</strong><p class="muted-sm">Recibe alertas de nuevas coincidencias.</p></div><label class="switch"><input type="checkbox" id="config-notif" checked><span class="slider"></span></label></div>
+          <div class="settings-row"><div><strong>Idioma</strong><p class="muted-sm">Idioma de la interfaz.</p></div>
+            <select class="input" id="config-lang" style="max-width:160px"><option value="es">Español</option><option value="en">English</option></select>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSPORTISTA: home -->
+      <section id="view-transportista-home" class="view">
+        <div class="view-head">
+          <div><h1>Hola, <span id="transportista-nombre-home">Transportista</span> 🚚</h1><p class="muted">Aquí va tu resumen de operaciones.</p></div>
+          <button class="btn btn-primary" data-action="open-publicar-viaje"><i class="fa-solid fa-plus"></i> Publicar viaje de retorno</button>
+        </div>
+        <div class="kpi-grid" id="transportista-kpis"></div>
+        <div class="grid-2">
+          <div class="glass-card panel">
+            <div class="panel-head"><h3>Próximos viajes</h3><a data-nav="transportista-viajes">Ver todos</a></div>
+            <div id="transportista-proximos" class="mini-list"></div>
+          </div>
+          <div class="glass-card panel">
+            <div class="panel-head"><h3>Calificación</h3></div>
+            <div class="rating-box" id="transportista-rating-box"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSPORTISTA: viajes -->
+      <section id="view-transportista-viajes" class="view">
+        <div class="view-head">
+          <div><h1>Mis viajes de retorno</h1><p class="muted">Publica, edita y gestiona tus rutas disponibles.</p></div>
+          <button class="btn btn-primary" data-action="open-publicar-viaje"><i class="fa-solid fa-plus"></i> Nuevo viaje</button>
+        </div>
+        <div class="filters-bar">
+          <input type="text" class="input" id="filtro-viaje-texto" placeholder="Buscar por origen o destino…">
+          <select class="input" id="filtro-viaje-estado"><option value="">Todos los estados</option></select>
+        </div>
+        <div class="cards-grid" id="transportista-viajes-grid"></div>
+      </section>
+
+      <!-- TRANSPORTISTA: cargas disponibles / aceptar -->
+      <section id="view-transportista-cargas" class="view">
+        <div class="view-head"><div><h1>Cargas disponibles</h1><p class="muted">Acepta cargas compatibles con tu vehículo y ruta.</p></div></div>
+        <div class="cards-grid" id="cargas-disponibles-grid"></div>
+      </section>
+
+      <!-- TRANSPORTISTA: calendario -->
+      <section id="view-transportista-calendario" class="view">
+        <div class="view-head"><div><h1>Calendario</h1><p class="muted">Tus viajes y entregas programadas.</p></div>
+          <div class="calendar-nav"><button class="icon-btn" id="cal-prev"><i class="fa-solid fa-chevron-left"></i></button><span id="cal-label"></span><button class="icon-btn" id="cal-next"><i class="fa-solid fa-chevron-right"></i></button></div>
+        </div>
+        <div class="glass-card panel"><div class="calendar-grid" id="calendar-grid"></div></div>
+      </section>
+
+      <!-- TRANSPORTISTA: ingresos -->
+      <section id="view-transportista-ingresos" class="view">
+        <div class="view-head"><div><h1>Ingresos</h1><p class="muted">Tu desempeño financiero simulado.</p></div></div>
+        <div class="kpi-grid" id="ingresos-kpis"></div>
+        <div class="grid-2">
+          <div class="glass-card panel"><div class="panel-head"><h3>Ingresos por mes</h3></div><canvas id="chart-ingresos"></canvas></div>
+          <div class="glass-card panel"><div class="panel-head"><h3>Kilómetros recorridos</h3></div><canvas id="chart-km"></canvas></div>
+        </div>
+      </section>
+
+      <!-- TRANSPORTISTA: vehículos -->
+      <section id="view-vehiculos" class="view">
+        <div class="view-head"><div><h1>Mis vehículos</h1><p class="muted">Administra tu flota.</p></div><button class="btn btn-primary" data-action="open-vehiculo"><i class="fa-solid fa-plus"></i> Agregar vehículo</button></div>
+        <div class="cards-grid" id="vehiculos-grid"></div>
+      </section>
+
+      <!-- TRANSPORTISTA: documentos -->
+      <section id="view-documentos" class="view">
+        <div class="view-head"><div><h1>Documentos</h1><p class="muted">Sube y valida tus documentos habilitantes.</p></div></div>
+        <div class="cards-grid" id="documentos-grid"></div>
+      </section>
+
+      <!-- TRANSPORTISTA: historial -->
+      <section id="view-transportista-historial" class="view">
+        <div class="view-head"><div><h1>Historial de viajes</h1><p class="muted">Todos tus viajes completados.</p></div>
+          <div class="export-actions">
+            <button class="btn btn-outline btn-sm" data-action="export-pdf" data-table="tabla-historial-transportista"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline btn-sm" data-action="export-excel" data-table="tabla-historial-transportista"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          </div>
+        </div>
+        <div class="table-toolbar"><input type="text" class="input" id="historial-transportista-buscar" placeholder="Buscar en historial…"></div>
+        <div class="table-wrap">
+          <table class="data-table" id="tabla-historial-transportista">
+            <thead><tr><th data-sort="id">ID</th><th data-sort="origen">Origen</th><th data-sort="destino">Destino</th><th data-sort="fecha">Fecha</th><th data-sort="empresa">Empresa</th><th data-sort="precio">Precio</th><th data-sort="estado">Estado</th></tr></thead>
+            <tbody id="historial-transportista-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="historial-transportista-pag"></div>
+      </section>
+
+      <!-- ADMIN: dashboard -->
+      <section id="view-admin-home" class="view">
+        <div class="view-head"><div><h1>Panel de administración</h1><p class="muted">Visión global de la plataforma CargaYa.</p></div></div>
+        <div class="kpi-grid" id="admin-kpis"></div>
+        <div class="grid-2">
+          <div class="glass-card panel"><div class="panel-head"><h3>Cargas por estado</h3></div><canvas id="chart-admin-estados"></canvas></div>
+          <div class="glass-card panel"><div class="panel-head"><h3>Crecimiento de usuarios</h3></div><canvas id="chart-admin-usuarios"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ADMIN: usuarios -->
+      <section id="view-admin-usuarios" class="view">
+        <div class="view-head"><div><h1>Usuarios</h1><p class="muted">Empresas, transportistas y administradores.</p></div></div>
+        <div class="table-toolbar"><input type="text" class="input" id="admin-usuarios-buscar" placeholder="Buscar usuario…">
+          <select class="input" id="admin-usuarios-filtro"><option value="">Todos los roles</option><option value="empresa">Empresa</option><option value="transportista">Transportista</option><option value="admin">Administrador</option></select>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="tabla-admin-usuarios">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Correo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="admin-usuarios-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ADMIN: publicaciones -->
+      <section id="view-admin-publicaciones" class="view">
+        <div class="view-head"><div><h1>Publicaciones</h1><p class="muted">Todas las cargas publicadas en la plataforma.</p></div></div>
+        <div class="table-wrap">
+          <table class="data-table" id="tabla-admin-publicaciones">
+            <thead><tr><th>ID</th><th>Empresa</th><th>Origen</th><th>Destino</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="admin-publicaciones-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ADMIN: viajes -->
+      <section id="view-admin-viajes" class="view">
+        <div class="view-head"><div><h1>Viajes de retorno</h1><p class="muted">Todos los viajes publicados por transportistas.</p></div></div>
+        <div class="table-wrap">
+          <table class="data-table" id="tabla-admin-viajes">
+            <thead><tr><th>ID</th><th>Transportista</th><th>Origen</th><th>Destino</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="admin-viajes-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ADMIN: reportes -->
+      <section id="view-admin-reportes" class="view">
+        <div class="view-head"><div><h1>Reportes y estadísticas</h1><p class="muted">Desempeño general de la plataforma.</p></div>
+          <div class="export-actions">
+            <button class="btn btn-outline btn-sm" data-action="generar-reporte"><i class="fa-solid fa-file-lines"></i> Generar reporte</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="glass-card panel"><div class="panel-head"><h3>Ingresos de la plataforma</h3></div><canvas id="chart-admin-ingresos"></canvas></div>
+          <div class="glass-card panel"><div class="panel-head"><h3>Cargas realizadas por mes</h3></div><canvas id="chart-admin-cargas"></canvas></div>
+        </div>
+        <div class="grid-2">
+          <div class="glass-card panel"><div class="panel-head"><h3>Empresas atendidas</h3></div><canvas id="chart-admin-empresas"></canvas></div>
+          <div class="glass-card panel"><div class="panel-head"><h3>Kilómetros totales</h3></div><canvas id="chart-admin-km"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ADMIN: configuraciones -->
+      <section id="view-admin-config" class="view">
+        <div class="view-head"><div><h1>Configuraciones de plataforma</h1><p class="muted">Parámetros generales (simulado).</p></div></div>
+        <div class="glass-card panel">
+          <div class="settings-row"><div><strong>Comisión por transacción</strong><p class="muted-sm">Porcentaje que cobra CargaYa por operación.</p></div><input class="input" style="max-width:120px" type="number" value="8" min="0" max="30" id="admin-comision"></div>
+          <div class="settings-row"><div><strong>Radio de matching (km)</strong><p class="muted-sm">Distancia máxima para sugerir coincidencias.</p></div><input class="input" style="max-width:120px" type="number" value="50" id="admin-radio"></div>
+          <div class="settings-row"><div><strong>Aprobación manual de empresas</strong><p class="muted-sm">Requiere validación del admin antes de publicar.</p></div><label class="switch"><input type="checkbox" id="admin-aprobacion"><span class="slider"></span></label></div>
+          <button class="btn btn-primary" id="admin-guardar-config"><i class="fa-solid fa-floppy-disk"></i> Guardar cambios</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ============ AUTH MODALS TEMPLATE ROOTS (rellenado por JS) ============ -->
+<template id="tpl-login">
+  <div class="auth-modal">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-role="empresa"><i class="fa-solid fa-building"></i> Empresa</button>
+      <button class="auth-tab" data-role="transportista"><i class="fa-solid fa-truck"></i> Transportista</button>
+      <button class="auth-tab" data-role="admin"><i class="fa-solid fa-user-shield"></i> Admin</button>
+    </div>
+    <h2>Iniciar sesión</h2>
+    <p class="muted">Usa cualquier correo de la demo o crea uno nuevo desde "Crear cuenta".</p>
+    <form id="form-login" class="form-grid">
+      <label>Correo electrónico<input class="input" type="email" id="login-email" required placeholder="empresa@demo.com"></label>
+      <label>Contraseña<input class="input" type="password" id="login-pass" required placeholder="••••••••"></label>
+      <div class="form-row-between">
+        <label class="checkbox-line"><input type="checkbox" checked> Recordarme</label>
+        <a href="#" class="link-sm">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Ingresar</button>
+    </form>
+    <p class="auth-swap">¿No tienes cuenta? <a href="#" data-action="open-register">Regístrate</a></p>
+    <div class="demo-hint" id="demo-hint"></div>
+  </div>
+</template>
+
+<template id="tpl-register">
+  <div class="auth-modal">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-role="empresa"><i class="fa-solid fa-building"></i> Empresa</button>
+      <button class="auth-tab" data-role="transportista"><i class="fa-solid fa-truck"></i> Transportista</button>
+    </div>
+    <h2>Crear cuenta</h2>
+    <div id="register-forms"></div>
+    <p class="auth-swap">¿Ya tienes cuenta? <a href="#" data-action="open-login">Inicia sesión</a></p>
+  </div>
+</template>
+
+<!-- ============ SCRIPTS ============ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/matching.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/empresa.js"></script>
+<script src="js/transportista.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
