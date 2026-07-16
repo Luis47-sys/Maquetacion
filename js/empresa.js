@@ -27,13 +27,17 @@ function cyRenderEmpresaHome(){
   `;
 
   const recientes = [...mias].sort((a,b)=> b.creado.localeCompare(a.creado)).slice(0,5);
-  document.getElementById('empresa-recientes').innerHTML = recientes.length ? recientes.map(p=>`
-    <div class="mini-item">
+  const recientesBox = document.getElementById('empresa-recientes');
+  recientesBox.innerHTML = recientes.length ? recientes.map(p=>`
+    <div class="mini-item mini-item-clickable" data-id="${p.id}">
       <div class="ni-icon" style="background:rgba(255,176,32,.15);color:#FFB020;width:34px;height:34px;border-radius:9px;display:grid;place-items:center"><i class="fa-solid fa-box"></i></div>
       <div class="mi-route"><strong>${p.origen} → ${p.destino}</strong><span>${cyFormatoFecha(p.fecha)} · ${p.vehiculo}</span></div>
       ${cyBadge(p.estado)}
     </div>
   `).join('') : `<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Aún no tienes publicaciones</p></div>`;
+  recientesBox.querySelectorAll('.mini-item-clickable').forEach(el=>{
+    el.onclick = ()=> cyNavigate('empresa-publicaciones');
+  });
 
   if(mias[0]){
     cyRenderRouteMap('map-empresa-home', {n:mias[0].origen, lat:mias[0].origenLat, lng:mias[0].origenLng}, {n:mias[0].destino, lat:mias[0].destinoLat, lng:mias[0].destinoLng});
@@ -123,10 +127,17 @@ function cyBindPublicacionActions(scope){
       const p = CY.publicaciones.find(x=>x.id===btn.dataset.id);
       const idx = ESTADO_ORDEN.indexOf(p.estado);
       p.estado = ESTADO_ORDEN[idx+1];
+      // Si la carga la lleva el transportista demo, registramos sus horas de
+      // manejo para que se aplique correctamente el descanso obligatorio.
+      if(p.estado==='finalizada' && p.transportistaAsignadoId===CY_DEMO_TRANSPORTISTA_ID){
+        p.fechaFinalizada = Date.now();
+        if(typeof cyRegistrarHorasManejo==='function') cyRegistrarHorasManejo(p);
+      }
       cyPersist();
       cyToast(`Estado actualizado a "${ESTADO_LABEL[p.estado]}"`,'success');
-      cyAddNotif('fa-truck', `La carga ${p.origen} → ${p.destino} cambió a "${ESTADO_LABEL[p.estado]}"`);
+      cyAddNotif('fa-truck', `La carga ${p.origen} → ${p.destino} cambió a "${ESTADO_LABEL[p.estado]}"`, 'empresa-publicaciones');
       cyRenderEmpresaPublicaciones();
+      if(typeof cyOnDisponibilidadChanged==='function') cyOnDisponibilidadChanged();
     };
   });
   scope.querySelectorAll('[data-action="eliminar-carga"]').forEach(btn=>{
@@ -206,10 +217,11 @@ function cyOpenPublicarCarga(editId=null){
           origen:data.origen, destino:data.destino, origenLat:oCiudad.lat, origenLng:oCiudad.lng, destinoLat:dCiudad.lat, destinoLng:dCiudad.lng,
           fecha:data.fecha, peso:Number(data.peso), volumen:Number(data.volumen), vehiculo:data.vehiculo,
           descripcion:data.descripcion, precio:Number(data.precio), estado:'pendiente', transportistaAsignado:null,
+          transportistaAsignadoId:null, fechaAceptada:null, fechaFinalizada:null,
           creado: new Date().toISOString().slice(0,10)
         });
         cyToast('Tu carga fue publicada. Buscando transportistas compatibles…','success','¡Publicado!');
-        cyAddNotif('fa-route', `Nueva carga publicada: ${data.origen} → ${data.destino}`);
+        cyAddNotif('fa-route', `Nueva carga publicada: ${data.origen} → ${data.destino}`, 'empresa-publicaciones');
       }
       cyPersist();
       cyCloseModal();
@@ -247,7 +259,14 @@ function cyRenderBuscarTransportistas(){
   `).join('') || `<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay transportistas con esos filtros.</p></div>`;
 
   grid.querySelectorAll('[data-action="contactar-transportista"]').forEach(btn=>{
-    btn.onclick = ()=>{ cyToast('Se inició un chat con el transportista.','success'); cyNavigate('chat'); };
+    const t = CY.transportistas.find(x=>x.id===btn.dataset.id);
+    btn.onclick = ()=>{
+      if(typeof cyAbrirChatCon==='function'){
+        cyAbrirChatCon(t.nombre, t.avatar, `Hola ${t.nombre.split(' ')[0]}, vi tu perfil en CargaYa. Tengo una carga que podría interesarte, ¿tienes disponibilidad?`);
+      } else {
+        cyNavigate('chat');
+      }
+    };
   });
   grid.querySelectorAll('[data-action="ver-perfil-transportista"]').forEach(btn=>{
     const t = CY.transportistas.find(x=>x.id===btn.dataset.id);
@@ -323,7 +342,21 @@ function cyRenderPerfil(){
 
   document.getElementById('form-password').onsubmit = (e)=>{
     e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form).entries());
+    const idx = CY_USERS.findIndex(u=>u.id===session.id);
+    if(idx===-1){ cyToast('No se encontró tu cuenta.','error'); return; }
+    if(data.actual !== CY_USERS[idx].pass){
+      cyToast('La contraseña actual no es correcta.','error');
+      return;
+    }
+    if(data.nueva !== data.confirmar){
+      cyToast('La nueva contraseña y su confirmación no coinciden.','error');
+      return;
+    }
+    CY_USERS[idx].pass = data.nueva;
+    cySaveUsers(CY_USERS);
     cyToast('Contraseña actualizada correctamente','success');
-    e.target.reset();
+    form.reset();
   };
 }

@@ -183,15 +183,18 @@ function cyHaversine(lat1,lng1,lat2,lng2){
   const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
   return Math.round(R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 }
+function cyHorasManejo(km){ return km/65; }
 function cyTiempoEstimado(km){
-  const horas = km/65;
+  const horas = cyHorasManejo(km);
   if(horas<1) return Math.round(horas*60)+' min';
   return horas.toFixed(1)+' h';
 }
 
 /* ---------------- NOTIFICACIONES ---------------- */
-function cyAddNotif(icon, text){
-  CY.notificaciones.unshift({id:cyId('NOT'), icon, text, leida:false, fecha:Date.now()});
+// `view` es opcional: el nombre de una vista del panel a la que navegar al
+// hacer clic en la notificación (p.ej. 'chat', 'transportista-cargas').
+function cyAddNotif(icon, text, view=null){
+  CY.notificaciones.unshift({id:cyId('NOT'), icon, text, view, leida:false, fecha:Date.now()});
   cyPersist();
   cyRenderNotifs();
 }
@@ -207,11 +210,24 @@ function cyRenderNotifs(){
     return;
   }
   list.innerHTML = CY.notificaciones.slice(0,25).map(n=>`
-    <div class="notif-item">
+    <div class="notif-item ${n.view?'clickable':''}" data-id="${n.id}">
       <div class="ni-icon"><i class="fa-solid ${n.icon}"></i></div>
       <div><p>${n.text}</p><span>${cyTimeAgo(n.fecha)}</span></div>
     </div>
   `).join('');
+  list.querySelectorAll('.notif-item').forEach(el=>{
+    el.onclick = ()=>{
+      const n = CY.notificaciones.find(x=>x.id===el.dataset.id);
+      if(!n) return;
+      n.leida = true;
+      cyPersist();
+      cyRenderNotifs();
+      if(n.view){
+        document.getElementById('notif-dropdown').classList.remove('open');
+        cyNavigate(n.view);
+      }
+    };
+  });
 }
 function cyTimeAgo(ts){
   const diff = Math.floor((Date.now()-ts)/1000);

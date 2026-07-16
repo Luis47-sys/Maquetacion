@@ -248,13 +248,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
     el.onclick = (e)=>{ e.preventDefault(); document.body.classList.remove('in-app'); window.scrollTo(0,0); };
   });
 
+  // Enlaces "Ver todos/todas" de los paneles de inicio -> navegan a la vista indicada
+  document.querySelectorAll('[data-nav]:not([data-nav="landing"]):not(#user-chip-dropdown [data-nav])').forEach(el=>{
+    el.onclick = (e)=>{ e.preventDefault(); cyNavigate(el.dataset.nav); };
+  });
+
   // Notificaciones
   const bell = document.getElementById('notif-bell');
   const dropdown = document.getElementById('notif-dropdown');
-  bell.onclick = (e)=>{ e.stopPropagation(); dropdown.classList.toggle('open'); CY.notificaciones.forEach(n=>n.leida=true); cyPersist(); cyRenderNotifs(); dropdown.classList.add('open'); };
-  document.addEventListener('click', ()=> dropdown.classList.remove('open'));
+  const closeAllDropdowns = ()=> document.querySelectorAll('.notif-dropdown.open').forEach(d=>d.classList.remove('open'));
+  bell.onclick = (e)=>{
+    e.stopPropagation();
+    const wasOpen = dropdown.classList.contains('open');
+    closeAllDropdowns();
+    if(!wasOpen){
+      dropdown.classList.add('open');
+      CY.notificaciones.forEach(n=>n.leida=true); cyPersist(); cyRenderNotifs();
+    }
+  };
+  document.addEventListener('click', closeAllDropdowns);
   dropdown.addEventListener('click', e=> e.stopPropagation());
   document.getElementById('notif-clear').onclick = ()=>{ CY.notificaciones=[]; cyPersist(); cyRenderNotifs(); };
+
+  // Menú de usuario (avatar + nombre en el topbar)
+  const userChip = document.getElementById('user-chip');
+  const userDropdown = document.getElementById('user-chip-dropdown');
+  userChip.onclick = (e)=>{
+    e.stopPropagation();
+    const wasOpen = userDropdown.classList.contains('open');
+    closeAllDropdowns();
+    if(!wasOpen) userDropdown.classList.add('open');
+  };
+  userDropdown.addEventListener('click', e=> e.stopPropagation());
+  userDropdown.querySelectorAll('[data-nav]').forEach(link=>{
+    link.onclick = (e)=>{ e.preventDefault(); closeAllDropdowns(); cyNavigate(link.dataset.nav); };
+  });
+  document.getElementById('user-chip-logout').onclick = (e)=>{ e.preventDefault(); closeAllDropdowns(); cyLogout(); };
 
   // Botones de acción "publicar"
   document.body.addEventListener('click', (e)=>{
@@ -288,6 +317,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(configDark){
     configDark.checked = savedTheme==='dark';
     configDark.onchange = cyToggleTheme;
+  }
+
+  // Config notificaciones push simuladas
+  const configNotif = document.getElementById('config-notif');
+  if(configNotif){
+    configNotif.checked = localStorage.getItem('cargaya_notif_push') !== 'off';
+    configNotif.onchange = ()=>{
+      localStorage.setItem('cargaya_notif_push', configNotif.checked ? 'on' : 'off');
+      cyToast(configNotif.checked ? 'Notificaciones push activadas' : 'Notificaciones push desactivadas', 'success');
+    };
+  }
+
+  // Config idioma
+  const configLang = document.getElementById('config-lang');
+  if(configLang){
+    configLang.value = localStorage.getItem('cargaya_lang') || 'es';
+    configLang.onchange = ()=>{
+      localStorage.setItem('cargaya_lang', configLang.value);
+      cyToast(configLang.value==='en' ? 'Language switched to English (demo)' : 'Idioma cambiado a Español', 'info');
+    };
   }
 
   // Sesión existente -> entrar directo

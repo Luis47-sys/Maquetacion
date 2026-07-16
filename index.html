@@ -297,13 +297,20 @@
             <div class="notif-list" id="notif-list"></div>
           </div>
         </div>
-        <div class="user-chip" id="user-chip">
-          <img id="user-avatar" src="" alt="avatar">
-          <div class="user-chip-text">
-            <strong id="user-chip-name">—</strong>
-            <span id="user-chip-role">—</span>
+        <div class="notif-wrap">
+          <div class="user-chip" id="user-chip">
+            <img id="user-avatar" src="" alt="avatar">
+            <div class="user-chip-text">
+              <strong id="user-chip-name">—</strong>
+              <span id="user-chip-role">—</span>
+            </div>
+            <i class="fa-solid fa-chevron-down"></i>
           </div>
-          <i class="fa-solid fa-chevron-down"></i>
+          <div class="notif-dropdown user-chip-dropdown" id="user-chip-dropdown">
+            <a href="#" class="user-chip-menu-item" data-nav="perfil"><i class="fa-solid fa-user"></i> Mi perfil</a>
+            <a href="#" class="user-chip-menu-item" data-nav="config"><i class="fa-solid fa-gear"></i> Configuración</a>
+            <a href="#" class="user-chip-menu-item" id="user-chip-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+          </div>
         </div>
       </div>
     </header>
@@ -386,6 +393,7 @@
         <div class="view-head"><div><h1>Coincidencias encontradas</h1><p class="muted">CargaYa cruzó tus datos y encontró estas opciones.</p></div>
           <button class="btn btn-outline" data-action="rerun-matching"><i class="fa-solid fa-rotate"></i> Buscar de nuevo</button>
         </div>
+        <div id="matching-banner"></div>
         <div id="matching-loading" class="matching-loading hidden">
           <div class="pulse-dot"></div><div class="pulse-dot"></div><div class="pulse-dot"></div>
           <span>Cruzando rutas, fechas y vehículos…</span>
@@ -421,9 +429,9 @@
           <div class="glass-card panel">
             <div class="panel-head"><h3>Seguridad</h3></div>
             <form id="form-password" class="form-grid">
-              <label>Contraseña actual<input class="input" type="password" required></label>
-              <label>Nueva contraseña<input class="input" type="password" required minlength="6"></label>
-              <label>Confirmar nueva contraseña<input class="input" type="password" required minlength="6"></label>
+              <label>Contraseña actual<input class="input" type="password" name="actual" required></label>
+              <label>Nueva contraseña<input class="input" type="password" name="nueva" required minlength="6"></label>
+              <label>Confirmar nueva contraseña<input class="input" type="password" name="confirmar" required minlength="6"></label>
               <button class="btn btn-primary" type="submit"><i class="fa-solid fa-key"></i> Cambiar contraseña</button>
             </form>
           </div>
@@ -448,6 +456,7 @@
           <div><h1>Hola, <span id="transportista-nombre-home">Transportista</span> 🚚</h1><p class="muted">Aquí va tu resumen de operaciones.</p></div>
           <button class="btn btn-primary" data-action="open-publicar-viaje"><i class="fa-solid fa-plus"></i> Publicar viaje de retorno</button>
         </div>
+        <div id="home-disponibilidad-banner"></div>
         <div class="kpi-grid" id="transportista-kpis"></div>
         <div class="grid-2">
           <div class="glass-card panel">
@@ -477,6 +486,7 @@
       <!-- TRANSPORTISTA: cargas disponibles / aceptar -->
       <section id="view-transportista-cargas" class="view">
         <div class="view-head"><div><h1>Cargas disponibles</h1><p class="muted">Acepta cargas compatibles con tu vehículo y ruta.</p></div></div>
+        <div id="cargas-disponibles-banner"></div>
         <div class="cards-grid" id="cargas-disponibles-grid"></div>
       </section>
 

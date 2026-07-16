@@ -102,10 +102,26 @@ function cyRenderAdminReportes(){
   };
 }
 
+const CY_ADMIN_CONFIG_KEY = 'cargaya_admin_config_v1';
 function cyInitAdminConfig(){
+  const comision = document.getElementById('admin-comision');
+  const radio = document.getElementById('admin-radio');
+  const aprobacion = document.getElementById('admin-aprobacion');
+  const saved = JSON.parse(localStorage.getItem(CY_ADMIN_CONFIG_KEY) || 'null');
+  if(saved){
+    if(comision) comision.value = saved.comision;
+    if(radio) radio.value = saved.radio;
+    if(aprobacion) aprobacion.checked = !!saved.aprobacion;
+  }
   const btn = document.getElementById('admin-guardar-config');
   if(btn) btn.onclick = ()=>{
     cyButtonLoading(btn, true, 'Guardando…');
-    setTimeout(()=>{ cyButtonLoading(btn,false); cyToast('Configuración de la plataforma guardada','success'); }, 700);
+    setTimeout(()=>{
+      cyButtonLoading(btn,false);
+      localStorage.setItem(CY_ADMIN_CONFIG_KEY, JSON.stringify({
+        comision: Number(comision.value), radio: Number(radio.value), aprobacion: aprobacion.checked
+      }));
+      cyToast('Configuración de la plataforma guardada','success');
+    }, 700);
   };
 }
